@@ -1,3 +1,4 @@
 *.csv
 *.model
 /.ipynb_checkpoints
+*.zip
