@@ -148,7 +148,7 @@
     - XGB, 다중 분류 : 62%
     - Feature importance 결과
         - game_money_change, playtime, class, solo_exp, npc_kill 등이 상위권
-    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/feat_imp.png?token=AJAGTKB5RN2WVWAKLY247425OOWG6)
+    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/feat_imp.png?token=AJAGTKHI7WQMLSF2YCFIFZ25OPLAG)
     - DNN, RandomForest로 총결제량 예측
         - y=x에 가까운 예측(아직 분산이 크지만 많이 향상된 결과)
         
