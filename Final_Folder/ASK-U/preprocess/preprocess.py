@@ -36,28 +36,25 @@ def load_data(is_test=0):
 """
 태정이형이 작성한 전처리 함수 작성해 주세용
 """
-def preprocess1():
-    pass
-
-def preprocess2():
+def preprocess():
     pass
     
 # main 함수 작성
-def main():
-    is_test = input('train 데이터를 호출할 경우 0, test1은 1, test2는 2를 입력해주세요.')
-    while is_test not in [0, 1, 2]:
-        is_test = input('잘못된 값을 입력하셨습니다.\ntrain 데이터를 호출할 경우 0, test1은 1, test2는 2를 입력해주세요.')
+def main(is_test):
+#     is_test = input('train 데이터를 호출할 경우 0, test1은 1, test2는 2를 입력해주세요.')
+#     while is_test not in [0, 1, 2]:
+#         is_test = input('잘못된 값을 입력하셨습니다.\ntrain 데이터를 호출할 경우 0, test1은 1, test2는 2를 입력해주세요.')
     if is_test == 0:
         activity, combat, pledge, trade, payment, label = load_data(is_test=is_test)
     else:
         activity, combat, pledge, trade, payment = load_data(is_test=is_test)
     # 전처리 함수를 작성
-    df1 = preprocess1(activity, combat, pledge, trade, payment)
-    df2 = preprocess2(activity, combat, pledge, trade, payment)
+    df1, df2 = preprocess(activity, combat, pledge, trade, payment)
     return df1, df2, is_test
 
 # 실행 문구 작성
 if __name__ == '__main__':
-    df1, df2, is_test = main()
-    df1.to_csv(int2name[is_test] + 'preprocess_1.csv')
-    df2.to_csv(int2name[is_test] + 'preprocess_2.csv')
+    for i in range(3):
+        df1, df2, is_test = main(is_test=i)
+        df1.to_csv(int2name[is_test] + 'preprocess_1.csv')
+        df2.to_csv(int2name[is_test] + 'preprocess_2.csv')
