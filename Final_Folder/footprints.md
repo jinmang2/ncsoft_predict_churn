@@ -353,7 +353,7 @@
         - login은 안했는데 결제를 한 날은 1, 아니면 0
         - 결제량이 20보다 큰 유저 구분
     - 새로 구성한 feature로 feature importance 재 계산
-    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/feat_imp_20190901.png?token=AJAGTKGDOMK5MGAVNLAYTEC5OSFZI)
+    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/feat_imp_20190901.png?token=AJAGTKABODHSEC7YROUP3SK5OSYV2)
     - 결제량이 0에 가까운 유저의 편차를 많이 줄였기에, 전체 유저 대상으로 특징 추출해서 일평균 결제량 예측 실시
     - precision, recall 분석
     - 총 결제량 10, 20 기준으로 나누어 예측 실시
@@ -558,7 +558,7 @@
                 'objective': 'reg:squarederror'
                }
     ```
-    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/bbbb.png?token=AJAGTKA7QYF3HSTXXJSLFZS5OSWQE)
+    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/bbbb.png?token=AJAGTKEUP22CJCC2WXSUWCS5OSYRI)
     - threshhold를 부여, 최적화 실시
     - 틀린 것에 대해 가중치를 크게 부여하여 학습을 진행하는 방향으로 예측을 실시, 굉장히 호전된 모습을 보임
 7. **smote모델과가중치모델(13000점)_kjy.ipynb**
@@ -620,6 +620,7 @@
     model.fit(data[data.columns[1:]], {"survival": train_label['survival_time'], "amount": train_label['amount_spent'],
                        "profit": train_label['E_profit']}, epochs=100, batch_size=128)
     ```
+    ```
     Epoch 1/100
     40000/40000 [==============================] - 13s 317us/step - loss: 3101.0709 - survival_loss: 2642.4984 - amount_loss: 0.5373 - profit_loss: 458.0352 - survival_mean_squared_error: 2642.4984 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 458.0352
     Epoch 2/100
@@ -635,6 +636,4 @@
     40000/40000 [==============================] - 11s 278us/step - loss: 3088.6458 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.7172 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.7172
     Epoch 100/100
     40000/40000 [==============================] - 11s 278us/step - loss: 3088.6645 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.7359 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.7359
-    ```
-    
     ```
