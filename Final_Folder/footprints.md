@@ -1,6 +1,9 @@
 # NCSOFT 이탈 유저 예측 및 기대 이익 최대화 공모전
 
 ## 우리는 무엇을 했는가?
+- 날짜는 최종 commit한 날짜를 기준으로 함
+- 작업한 날짜와 일치하지 않을 수 있음
+
 ### 8/21
 1. **변수추가함수(1주차)_kjy.ipynb**
     - Feature 추가
@@ -232,4 +235,406 @@
     - 통계적으로 유의한 결과를 찾기 위해서 다양한 모델을 사용하고 weight 조절, feature in/out을 거듭했지만 뚜렷한 성과가 나오진 못함
 
 ### 9/1
-1. 
+1. **loss 임의로 정의_kjy.ipynb**
+    - loss를 조정하여 성능 향상을 꿈꾼다
+    ```python
+    import keras.backend as K
+
+    # model 1 
+    input_1 = Input(shape = (1,), name='input_1')
+    x = Dense(8,activation='relu')(input_1)
+    x = Dense(1, activation='relu')(x)
+
+    # model 2
+    y = Dense(128,activation='relu')(input_1)
+    y = Dense(1, activation='relu')(y)
+
+    # loss
+    def loss(real,pred):
+        return K.min(real-pred)
+
+    # Concat x, y
+    z = concatenate([x, y])
+    main_output = Dense(1, activation='relu')(z)
+
+    # model
+    model = Model(inputs=input_1, outputs=main_output)
+
+
+    model.compile(optimizer='rmsprop',
+                  loss=loss,
+                  metrics=['accuracy']) 
+    ```
+    - 또 다르게 모델을 구성
+    ```python
+    # Build a model
+    inputs = Input(shape=(128,))
+    layer1 = Dense(256, activation='relu')(inputs)
+    layer2 = Dense(512, activation='relu')(layer1)
+    layer3 = Dense(800, activation='relu')(layer2)
+    layer4 = Dense(800, activation='relu')(layer3)
+    layer5 = Dense(800, activation='relu')(layer4)
+    layer6 = Dense(512, activation='relu')(layer5)
+    layer7 = Dropout(0.5)(layer6)
+    layer8 = Dense(256, activation='relu')(layer7)
+    layer9 = Dense(32, activation='relu')(layer8)
+    predictions = Dense(1)(layer9)
+    model = Model(inputs=inputs, outputs=predictions)
+
+    # Define custom loss
+    def custom_loss(y_true,y_pred):
+        return K.mean(K.square((y_pred - y_true)), axis=-1)
+    
+    # Compile the model
+    model.compile(optimizer='adam',
+                  loss=custom_loss, # Call the loss function with the selected layer
+                  metrics=['accuracy',custom_loss])
+    
+    from keras.callbacks import EarlyStopping
+    early_stopping = EarlyStopping(monitor='val_cutstom_loss', patience=20, mode='min')
+    
+    # train
+    model.fit(X_train, y_train, epochs=1000000, batch_size=128, validation_data=(X_test, y_test),
+              callbacks=[early_stopping])
+    ```
+    ```
+    Train on 12369 samples, validate on 7069 samples
+    Epoch 1/1000000
+    12369/12369 [==============================] - 4s 331us/step - loss: 577367.4039 - acc: 0.0000e+00 - custom_loss: 577367.4039 - val_loss: 203.0442 - val_acc: 0.0000e+00 - val_custom_loss: 203.0442
+    Epoch 2/1000000
+    12369/12369 [==============================] - 1s 106us/step - loss: 157.4279 - acc: 0.0000e+00 - custom_loss: 157.4279 - val_loss: 80.1674 - val_acc: 0.0000e+00 - val_custom_loss: 80.1674
+    Epoch 3/1000000
+    12369/12369 [==============================] - 1s 107us/step - loss: 95.9589 - acc: 0.0000e+00 - custom_loss: 95.9589 - val_loss: 71.9441 - val_acc: 0.0000e+00 - val_custom_loss: 71.9441
+    Epoch 4/1000000
+    12369/12369 [==============================] - 1s 107us/step - loss: 117.8345 - acc: 0.0000e+00 - custom_loss: 117.8345 - val_loss: 64.4805 - val_acc: 0.0000e+00 - val_custom_loss: 64.4805
+    ----------------------------------------(중략)------------------------------------------------
+    Epoch 49/1000000
+    12369/12369 [==============================] - 2s 145us/step - loss: 50.1677 - acc: 0.0000e+00 - custom_loss: 50.1677 - val_loss: 57.5607 - val_acc: 0.0000e+00 - val_custom_loss: 57.5607
+    Epoch 50/1000000
+    12369/12369 [==============================] - 2s 143us/step - loss: 50.5902 - acc: 0.0000e+00 - custom_loss: 50.5902 - val_loss: 54.0751 - val_acc: 0.0000e+00 - val_custom_loss: 54.0751
+    Epoch 51/1000000
+    12369/12369 [==============================] - 2s 141us/step - loss: 51.1235 - acc: 0.0000e+00 - custom_loss: 51.1235 - val_loss: 60.2402 - val_acc: 0.0000e+00 - val_custom_loss: 60.2402
+    Epoch 52/1000000
+    12369/12369 [==============================] - 2s 145us/step - loss: 50.0738 - acc: 0.0000e+00 - custom_loss: 50.0738 - val_loss: 55.5904 - val_acc: 0.0000e+00 - val_custom_loss: 55.5904
+    Epoch 53/1000000
+    12369/12369 [==============================] - 2s 147us/step - loss: 49.9989 - acc: 0.0000e+00 - custom_loss: 49.9989 - val_loss: 59.6874 - val_acc: 0.0000e+00 - val_custom_loss: 59.6874
+    ```
+    - 크게 향상된 결과를 얻지는 못함
+2. **거래데이터변수추가_kyj.ipynb**
+    - 매수 / 매도 유저 구분
+    - 총 결제량 10, 20을 기준으로 유저를 분리
+    - 판매 거래 합, 구매 거래 합
+    - 교환창 거래 합
+    - 개인상점 거래 합
+    - 총 거래 합
+    - 구매 가격 - 판매 가격
+    - 판매 물량 - 구매 물량
+    - 수행한 것인지?
+        - 거래 캐릭터가 주개인지 부캐인지 여부
+        - 거래 일수 / 접속 일수
+        - 하루 평균 거래 일수
+        - 주 거래 시간대
+        - 거래 시간 간격
+        - 거래 아이템 유형 1~6등 or 유형별 %
+    - 명훈's 변수 추출
+3. **결제 데이터에서 변수 추가_kjy.ipynb**
+    - 기본적으로 위의 군집 파일의 함수들이 중복되는 것이 많음
+    - 결제 패턴 변수 (군집=4, total과 상관 : 29.35%)
+    - 결제 일수
+    - 일평균 결제량
+    - 28일 평균 결제량
+    - 결제일과 활동일의 간격
+    - 게임 머니 change minus
+4. **결제 데이터에서 변수 추가_kjy.ipynb**
+    - 위의 아디이어들 종합
+        - 실제 접속일 데이터
+        - 활동시간 판별
+        - 결제 금액 판별
+        - login은 안했는데 결제를 한 날은 1, 아니면 0
+        - 결제량이 20보다 큰 유저 구분
+    - 새로 구성한 feature로 feature importance 재 계산
+    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/feat_imp_20190901.png?token=AJAGTKGDOMK5MGAVNLAYTEC5OSFZI)
+    - 결제량이 0에 가까운 유저의 편차를 많이 줄였기에, 전체 유저 대상으로 특징 추출해서 일평균 결제량 예측 실시
+    - precision, recall 분석
+    - 총 결제량 10, 20 기준으로 나누어 예측 실시
+    - 종합 모델 만들기
+        - 결제량 계획
+            1. 비과금, 10 미만, 10 이상 20 미만, 20이상으로 분류 (각각 무과금,1,2,3 그룹이라 칭함) (train, valid, test 사용)
+                - 전체 유저 대상으로 과금 여부, 10 이상 ,20 이상 여부 모델 각각 만듦  (fit)
+                - 만들어진 모델로 유저(train,valid data) 분류 (predict)
+                - 세 모델 크로스체크해서 상충되는 예측 결과 정리
+            2. 1그룹은 전반적으로 상관관계 높은 총결제량으로 예측
+                - 1그룹으로 분류된 유저(train,valid data)를 대상으로 일평균결제량 예측 모델 생성 (fit)
+            3. 2그룹은 전반적으로 상관관계 높은 일평균결제량으로 예측
+                - 2그룹으로 분류된 유저(train,valid data)를 대상으로 일평균결제량 예측 모델 생성 (fit)
+            4. 3그룹은 전반적으로 상관관계 높은 일평균결제량으로 예측
+                - 3그룹으로 분류된 유저(train,valid data)를 대상으로 일평균결제량 예측 모델 생성 (fit)
+            5. test 데이터로 최종 테스트
+                - test 데이터 그룹 분류 (predict)
+                - test 데이터 각 그룹의 결제량 예측 (predict)
+        - 1~4번 그룹으로 총결제량 예측 모델 구성
+        ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/total_amount.png?token=AJAGTKEPIA6LZHVIZENDCTK5OSGMQ)
+            - 큰 돈을 쓴 친구를 이전보다 잘 맞추게 됨
+5. **혈맹변수 생성_kjy.ipynb**
+    - 팁 : 혈맹의 공격성과 총 결제량은 비례한다
+    - 혈맹 아이디로 분석
+    - 주캐의 혈맹에 대한 변수 추가
+    - 부캐들의 혈맹 정보만 합치기
+    - 태정이형 변수 합치기
+        - 가입한 혈맹의 순휘
+        - 혈맹원의 합
+        - 접속일 변수 log_in_freq 생성
+    - 부캐의 평균 레벨
+    - 유저의 혈맹 개수
+
+### 9/2
+1. **거래데이터변수추가(0902최종)_kyj.ipynb**
+    - 거래데이터변수추가_kyj과 달라진 점은?
+        - 거래횟수 / 접속일수 = 일평균 거래횟수
+        - 거래일수 / 접속일수
+        - 주 거래 시간대
+    - 큰 성능 향상을 얻어내지는 못함
+2. **혈맹변수 생성(0902)_kjy.ipynb**
+    - 혈맹변수 생성_kjy과 달라진 점은?
+        - 있으면 기입 요망
+
+### 9/3
+1. **거래데이터변수추가(0903최종)_kyj.ipynb**
+    - 거래데이터변수추가(0902최종)_kyj와 달라진 점은?
+        - 거래 상대 수 / 거래 횟수
+2. **data_merge_all.ipynb**
+    - 일 기준 flatten 시 모델의 복잡도는 높아지나 성능 개선의 효과는 미미하여 주석처리
+    - 위에서 지끔까지 한 feature들 총 집합
+        - 전체 - 주캐
+        - 주캐와 부캐로 나눠서 sum
+        - 주캐 특성 vs 전체 특성 비교
+        - 생존과 부활 비교
+        - 변수별 횟수 세는 변수 추가
+        - 접속 중단 횟수
+        - 실제 접속일 데이터
+        - 군집화 변수 추가
+            - 접속 패턴
+            - 전투 패턴
+            - 사냥 패턴
+            - 결제 패턴
+        - 전투 기록 유무
+        - 레벨 상승 고려
+        - 캐릭터별 각 전투 변수의 28일간 표준편차
+        - 유저별 각 전투 변수의 28이 간 표준편차
+        - 총 사용 캐릭터 개수, 총 접속일수
+        - 보유 캐릭터 수
+        - 사용자 최고 레벨
+        - 접속일자 단순 합
+        - 부캐의 평균 레벨
+        - 결제 데이터 추가
+        - 일평균 결제량
+        - 28일 평균 결제량
+        - login 여부에 따른 변수
+        - 게임머니 change minus
+        - trade 변수 추가
+        - 판매 거래 합, 구매 거래 합
+        - 교환창 거래 합
+        - 개인상점 거래 합
+        - 구매가격 - 판매가격
+        - 이익
+        - 구매한 아이템의 가격 차
+        - 판매 물량 - 구매 물량
+        - 주캐의 거래 특성, 부캐의 거래 특성 분리
+        - 거래 횟수 / 접속일수 = 일평균 거래 횟수
+        - 거래 시간대에 대한 변수 추가
+        - 장사꾼 유저 추가-
+        - pledge 순위
+        - log_in_freq
+        - 유저별 가입한 혈맹 수
+        - 유저별 a서버, b서버 접속 횟수
+        - 주캐의 혈맹으로만 데이터 구성
+        - 4주 단위 flatten
+
+### 9/7
+1. **0904_변수선택을위한_생존기간군집별_비교_kjy.ipynb**
+    - merge_all_flatten.csv 파일로 시작
+    - minus, plus column 제거
+    - 64(잔존)을 제외한 데이터 구축
+    - 생존기간 군집별 비교를 위한 survival_time을 10, 20, 64 기준으로 cut
+2. **결제량예측을위한feature_selection_kjy _0904.ipynb**
+    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/survtime.png?token=AJAGTKDEUTHVVZ7275G2SUC5OSXX2)
+3. **0906과금유저임계점기반으로 마지막 특성선택_kjy.ipynb**
+    - 접속 여부를 1주 단위로 비율로 표현
+    ```python
+    def week_login(data):
+        for i in range(4):
+            data['week' + str(i) _ '_log'] = (data[str(i+1)] + data[str(i+2)] + data[str(i+3)] + data[str(i+4)] + data[str(i+5)] + data[str(i+6)] + data[str(i+7)]) / 7
+        data = data.drop([str(i+1) for i in range(28)], axis=1)
+        return data
+    ```
+    - merge_all_flatten.csv 파일로 시작
+    - week_login 함수를 적용
+    - y label에 가중치 적용
+    ```python
+    data = pd.read_csv('/content/drive/My Drive/merge_all_flatten.csv')    
+    train_label = pd.read_csv('/content/drive/My Drive/train_label_add.csv')
+    train_label = train_label.sort_values('acc_id')
+    data_lbl = pd.merge(data, train_label, on='acc_id')
+    data_lbl['w_amount_spent'] = data_lbl['amount_spent_y'] * np.log(data_lbl['amount_spent_y'] + 1) * 1.6
+    ```
+    - 가중치를 로그 1.6으로 하면 test1의 고과금 분포가 떨어지고 1의 1이상 고곽므 유저 분포가 올라감
+    - 1.6 가중치에 1 ~ 1.2 찾기
+        - from '과금유저_특성임계점찾기_0906.ipynb' ##
+        - 가중치 적용 라벨 rmse:  3.782422232244276
+        - Thresh=mean, n=106,  rmse: 1.207450
+        - 가중치 적용 라벨 rmse:  3.8340910916235407
+        - Thresh=1.1*mean, n=94,  rmse: 1.096478
+        - 가중치 적용 라벨 rmse:  3.7678681577184294
+        - Thresh=1.2*mean, n=86,  rmse: 1.185979
+        - 가중치 적용 라벨 rmse:  3.7485768524426284
+        - Thresh=1.3*mean, n=79,  rmse: 1.234714
+4. **feature_Selection_grid_search_0904_0905_kjy.ipynb**
+    - 일단 전체 유저를 대상으로 총결제량을 예측하는 최적 모델을 찾을 것이다. 이 모델이 여전히 0인 유저, 20 이상인 유저를 제대로 잡아내지 못한다면 아래 과정을 거칠 것이다. 
+        - 총결제량이 20 이상인 경우 잔존인 유저의 수가 80% 이상으로 높으므로, 총결제량 20인 유저를 분류하는 이진분류 모델을 최적화할 것이다. 
+        - 현재 40000명 유저 중 16000명이 무과금 유저이며, 모델 예측에서는 0인 유저를 총결제량 20 이상으로까지 예측하는 상황이므로 이들을 바르게 예측하고 있는지 이진 분류 또한 필요하다. 
+        - 이 작업이 완료되면 총결제량 0초과 20이하인 유저를 대상으로 총결제량을 예측하는 회귀 모델을 적용할 것이다. 
+    - 일평균 결제량 .55 이상인 유저 일평균 결제량 예측 (생존기간 1인 유저의 분포를 바탕으로 선정)
+        - 고과금 유저 결제량 예측을 위한 모델
+        - 전체 844명이고 높은 결제량을 가진 유저는 매우 적은 편이라 오버샘플링 필요
+    - 데이터에 가중치를 적용해서 고과금 유저 정확도 높이기
+    - 임계점을 각기 다르게 부여하고 생존 기간, 과금 양에 따라 유저를 구분하여 모델을 구축, 성능이 매우 오른 것을 확인할 수 있었다.
+5. **xgb loss 가중치 적용해서 일결제량 예측 및 생존기간 회귀모델_0905_kjy.ipynb**
+    ```python
+    def huber_approx_obj(preds, dtrain):
+        d = preds - dtrain.get_label()
+        h = 1  #h is delta in the graphic
+        scale = 1 + (d / h) ** 2
+        scale_sqrt = np.sqrt(scale)
+        grad = d / scale_sqrt
+        hess = 1 / scale / scale_sqrt
+        return grad, hess
+    def jrmse(predt: np.ndarray, dtrain: xgb.DMatrix):
+        ''' Root mean squared error metric.'''
+        y = dtrain.get_label()
+        elements = np.power((np.power(y,2) - np.power(predt,2)), 2)
+        return 'JRMSE', float(np.sqrt(np.sum(elements) / len(y)))
+    def gradient(predt: np.ndarray, dtrain: xgb.DMatrix):
+        '''Compute the gradient squared error.'''
+        y = dtrain.get_label()
+        return np.power((np.power(y,2) - np.power(predt,2)), 2)
+
+    def hessian(predt: np.ndarray, dtrain: xgb.DMatrix):
+        '''Compute the hessian for squared log error.'''
+        y = dtrain.get_label()
+        return np.power((predt-y),2)
+
+    def jsme(predt: np.ndarray,
+                    dtrain: xgb.DMatrix):
+        '''Squared Log Error objective. A simplified version for RMSLE used as
+        objective function.
+        '''
+        grad = gradient(predt, dtrain)
+        hess = hessian(predt, dtrain)
+        return grad, hess
+6. **12000점파일_kjy.ipynb**
+    - 0906과금유저임계점기반으로 마지막 특성선택_kjy의 내용을 적용
+    - 과금 유저를 대상으로 가중치 부여
+    ```python
+    data_lbl['spent_1'] = np.where(data_lbl['amount_spent_y']>0, 1, 0) # 일평균 결제량이 1 이상이면 1, 아니면 0
+
+    data_055 = data_lbl[data_lbl['amount_spent_y']>0].drop(['Unnamed: 0', 'survival_time', 'amount_spent_y', 'secession',
+           'total_spent', 'spent_1','w_amount_spent'], axis=1)
+    #가중치
+    data_lbl['w_amount_spent'] = data_lbl['amount_spent_y']*np.log(data_lbl['amount_spent_y']+1)*1.5
+    ```
+    - 변수 선택 후 0 초과 유저만 학습(12000점 파라미터)
+    ```python
+    xgb_pars = {'learning_rate': 0.01, 
+                'gamma' : 0.1, 
+                'min_child_weight' : 10,
+                'nthread' : 15,
+                'max_depth' : 50,
+                'subsample' : 0.5,
+                'eval_metric' : 'rmse',
+                'colsample_bytree' : 0.8, 
+                'num_boost_round' : 500,
+                'n_estimators': 500,
+                'max_leaves': 300,
+                'objective': 'reg:squarederror'
+               }
+    ```
+    ![title](https://raw.githubusercontent.com/MyungHoon-Jin/ncsoft_predict_churn/master/bbbb.png?token=AJAGTKA7QYF3HSTXXJSLFZS5OSWQE)
+    - threshhold를 부여, 최적화 실시
+    - 틀린 것에 대해 가중치를 크게 부여하여 학습을 진행하는 방향으로 예측을 실시, 굉장히 호전된 모습을 보임
+7. **smote모델과가중치모델(13000점)_kjy.ipynb**
+    - amount spent, survival time 기준으로 split
+    - 이 외에 역할이 있을 경우 기입 요망
+8. **뉴럴넷으로기대이익구하기_kjy.ipynb**
+    - 한번에 기대이익을 구할 수 있는 모델을 구축하려 시도
+    ```python
+    # model 1 
+    input_1 = Input(shape = (400,), name='input_1')
+    x = Dense(800,activation='relu')(input_1)
+    x = Dense(1000, activation='relu')(x)
+    x = Dense(2000, activation='relu')(x)
+    x = Dense(2000, activation='relu')(x)
+    x = Dense(1000, activation='relu')(x)
+    x = Dense(500, activation='relu')(x)
+    x = Dense(1)(x)
+    #x = Activation('softmax',name="survival")(x)
+    x = Activation('relu',name="survival")(x)
+
+    # model 2
+    y = Dense(400,activation='relu')(input_1)
+    y = Dense(800, activation='relu')(y)
+    y = Dense(100, activation='relu')(y)
+    y = Dense(2000, activation='relu')(y)
+    y = Dense(2000, activation='relu')(y)
+    y = Dense(400, activation='relu')(y)
+    y = Dense(1)(y)
+    y = Activation('relu',name="amount")(y)
+
+    # loss
+    #def loss(x,y):
+    #    return K.min(y_true-y_pred)
+
+    # Concat x, y
+    #k = Lambda(lambda x: K.argmax(x, axis=-1))(x)
+    z = concatenate([x, y])
+    z = Dense(500, activation='relu')(z)
+    z = Dense(1000, activation='relu')(z)
+    z = Dense(500, activation='relu')(z)
+    z = Dense(1)(z)
+    z = Activation('relu', name="profit")(z)
+
+
+    # model
+    model = Model(inputs=input_1, outputs=[x,y,z])
+
+    losses = {
+        #"survival": "sparse_categorical_crossentropy",
+        "survival": "mse",
+        "amount": "mse",
+        "profit": "mse"}
+
+    model.compile(optimizer='rmsprop',
+                  loss=losses,
+                  metrics=['mse'])    
+
+    model.summary()
+    model.fit(data[data.columns[1:]], {"survival": train_label['survival_time'], "amount": train_label['amount_spent'],
+                       "profit": train_label['E_profit']}, epochs=100, batch_size=128)
+    ```
+    Epoch 1/100
+    40000/40000 [==============================] - 13s 317us/step - loss: 3101.0709 - survival_loss: 2642.4984 - amount_loss: 0.5373 - profit_loss: 458.0352 - survival_mean_squared_error: 2642.4984 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 458.0352
+    Epoch 2/100
+    40000/40000 [==============================] - 11s 277us/step - loss: 3088.9050 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.9765 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.9765
+    Epoch 3/100
+    40000/40000 [==============================] - 11s 277us/step - loss: 3088.8256 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.8970 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.8970
+    Epoch 4/100
+    40000/40000 [==============================] - 11s 275us/step - loss: 3088.8480 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.9195 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.9195
+    (중략)
+    Epoch 98/100
+    40000/40000 [==============================] - 11s 278us/step - loss: 3088.5942 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.6656 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.6656
+    Epoch 99/100
+    40000/40000 [==============================] - 11s 278us/step - loss: 3088.6458 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.7172 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.7172
+    Epoch 100/100
+    40000/40000 [==============================] - 11s 278us/step - loss: 3088.6645 - survival_loss: 2630.3913 - amount_loss: 0.5373 - profit_loss: 457.7359 - survival_mean_squared_error: 2630.3913 - amount_mean_squared_error: 0.5373 - profit_mean_squared_error: 457.7359
+    ```
+    
+    ```
