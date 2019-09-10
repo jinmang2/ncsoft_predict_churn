@@ -1393,5 +1393,5 @@ def main(is_test):
 if __name__ == '__main__':
     for i in range(3):
         df1, df2, is_test = main(is_test=i)
-        df1.to_csv(int2name[is_test] + 'preprocess_1.csv', index=False)
-        df2.to_csv(int2name[is_test] + 'preprocess_2.csv', index=False)
+        df1.to_csv(int2name[i] + 'preprocess_1.csv', index=False)
+        df2.to_csv(int2name[i] + 'preprocess_2.csv', index=False)
