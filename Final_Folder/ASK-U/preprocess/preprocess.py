@@ -1363,7 +1363,29 @@ def preprocess(activity, combat, pledge, trade, payment):
        'temp_cnt_4_y', 'etc_cnt_4_y', 'combat_play_time_4', 'pledge_rank_4',
        'amount_spent_1', 'amount_spent_4']]
     
-    amount_spent = merge_all_flatten[['acc_id','playtime', 'quest_exp', 'game_money_change', 'playtime_count', 'npc_kill_count', 'solo_exp_count', 'quest_exp_count', 'game_money_change_count', 'day_attack', 'day_temp', 'std_same', 'acc_std_same', 'level_max', 'day_count', 'char_max', 'day_sum', 'C_1', 'C_4', 'C_5', 'C_7', 'level', 'day_mean', 'day_x', 'amount_spent', 'pay_count', 'pay_mean', 'non_login_pay', 'minuss', 'pluss', 'minus_am', 'plus_am', 'day_s', 'item_amount_s', 'item_6_s', 'item_amount_t', 'item_price_t', 'item_2_t', 'num_trade_s', 'num_trade_shop', 'num_trade', 'sell_amount', 'buy_amount', 'margin', 'amount_diff', 'day_s_m', 'item_amount_s_m', 'item_2_s_m', 'item_6_s_m', 'type_shop_s_m', 'day_t_m', 'item_price_t_m', 'day_s_nd', 'item_6_s_nd', 'type_ex_s_nd', 'day_t_nd', 'item_amount_t_nd', 'item_1_t_nd', 'item_2_t_nd', 'trade_ratio', 'hour_s', 'hour_mean', 'hour_s_700', 'hour_t_100', 'hour_t_300', 'source_sum', 'source_merchant_ratio', 'play_char_cnt', 'temp_cnt_y', 'pledge_rank', 'pledge_member_num', 'play_char_cnt_main', 'random_defender_cnt_main', 'play_char_cnt_sub', 'same_pledge_cnt_sub', 'solo_exp_1', 'quest_exp_1', 'playtime_2', 'quest_exp_2', 'playtime_4', 'npc_kill_4', 'solo_exp_4', 'quest_exp_4', 'fishing_4', 'game_money_change_4', 'same_pledge_cnt_1_x', 'pledge_cnt_4', 'play_char_cnt_1', 'combat_play_time_1', 'play_char_cnt_2', 'play_char_cnt_3', 'combat_char_cnt_3', 'random_defender_cnt_3_y', 'temp_cnt_3_y', 'etc_cnt_3_y', 'combat_play_time_3', 'play_char_cnt_4', 'pledge_rank_4', 'amount_spent_1', 'amount_spent_3', 'amount_spent_4', 'week1_log', 'week2_log', 'week3_log', 'week4_log']]
+    amount_spent = merge_all_flatten[
+        ['acc_id','playtime', 'quest_exp', 'game_money_change', 'playtime_count', 
+         'npc_kill_count', 'solo_exp_count', 'quest_exp_count', 'game_money_change_count', 
+         'day_attack', 'day_temp', 'std_same', 'acc_std_same', 'level_max', 'day_count', 
+         'char_max', 'day_sum', 'C_1', 'C_4', 'C_5', 'C_7', 'level', 'day_mean', 'day_x', 
+         'amount_spent', 'pay_count', 'pay_mean', 'non_login_pay', 'minuss', 'pluss', 
+         'minus_am', 'plus_am', 'day_s', 'item_amount_s', 'item_6_s', 'item_amount_t', 
+         'item_price_t', 'item_2_t', 'num_trade_s', 'num_trade_shop', 'num_trade', 
+         'sell_amount', 'buy_amount', 'margin', 'amount_diff', 'day_s_m', 
+         'item_amount_s_m', 'item_2_s_m', 'item_6_s_m', 'type_shop_s_m', 'day_t_m', 
+         'item_price_t_m', 'day_s_nd', 'item_6_s_nd', 'type_ex_s_nd', 'day_t_nd', 
+         'item_amount_t_nd', 'item_1_t_nd', 'item_2_t_nd', 'trade_ratio', 'hour_s', 
+         'hour_mean', 'hour_s_700', 'hour_t_100', 'hour_t_300', 'source_sum', 
+         'source_merchant_ratio', 'play_char_cnt', 'temp_cnt_y', 'pledge_rank', 
+         'pledge_member_num', 'play_char_cnt_main', 'random_defender_cnt_main', 
+         'play_char_cnt_sub', 'same_pledge_cnt_sub', 'solo_exp_1', 'quest_exp_1', 
+         'playtime_2', 'quest_exp_2', 'playtime_4', 'npc_kill_4', 'solo_exp_4', 
+         'quest_exp_4', 'fishing_4', 'game_money_change_4', 'same_pledge_cnt_1_x', 
+         'pledge_cnt_4', 'play_char_cnt_1', 'combat_play_time_1', 'play_char_cnt_2', 
+         'play_char_cnt_3', 'combat_char_cnt_3', 'random_defender_cnt_3_y', 'temp_cnt_3_y', 
+         'etc_cnt_3_y', 'combat_play_time_3', 'play_char_cnt_4', 'pledge_rank_4', 
+         'amount_spent_1', 'amount_spent_3', 'amount_spent_4', 'week1_log', 
+         'week2_log', 'week3_log', 'week4_log']]
 
     
     return survival_time, amount_spent
